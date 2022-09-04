@@ -55,21 +55,33 @@ class BetService {
     delete changes.id;
     await Promise.all(betsToSettled.map(async(id) => {
       const bet = await models.Bet.findByPk(id, {
-        include: ['userItems', 'userBets']
+        include: ['userItems']
       });
-
       if(bet.dataValues.status === 'active'){
+        changes.status = 'settled'
         await bet.update(changes);
 
         if(bet.userItems.length !== 0) {
-          if(bet.dataValues.result === 'won'){
+          const stateData = {};
+
+          if(bet.dataValues.result === 'won' && bet.dataValues.userItems[0].UserBet.dataValues.state === 'open'){
             const addData = {
               userId: bet.dataValues.userItems[0].dataValues.id,
-              amount: Math.abs((bet.dataValues.userBets[0].dataValues.amount) * (bet.dataValues.odd)),
+              amount: Math.abs((bet.dataValues.userItems[0].UserBet.dataValues.amount) * (bet.dataValues.odd)),
               status:'done',
               category: 'winning'
             }
             await models.Transaction.create(addData);
+            //Update settled state user-bet
+            stateData.state = 'won';
+            await models.UserBet.update(stateData, {
+              where: {id: bet.dataValues.userItems[0].UserBet.dataValues.id}
+            });
+          }else if(bet.dataValues.result === 'lost' && bet.dataValues.userItems[0].UserBet.dataValues.state === 'open'){
+            stateData.state = 'lost';
+            await models.UserBet.update(stateData, {
+              where: {id: bet.dataValues.userItems[0].UserBet.dataValues.id}
+            });
           }
         }
       }
