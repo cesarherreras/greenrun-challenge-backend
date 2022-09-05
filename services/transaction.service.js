@@ -56,6 +56,7 @@ class TransactionService {
   async createDeposit(user, data) {
     const addCategoryData = {
       ...data,
+      userId: user,
       category: 'deposit'
     }
     const newTransaction = await models.Transaction.create(addCategoryData);
@@ -82,6 +83,7 @@ class TransactionService {
     if(totalAmount[0].totalAmount >= data.amount) {
       const addCategoryData = {
           ...data,
+          userId: user,
           amount: data.amount * (-1),
           category: 'withdraw'
         }

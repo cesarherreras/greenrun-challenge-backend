@@ -6,7 +6,6 @@ const status = Joi.string();
 const category = Joi.string();
 
 const createTransactionSchema = Joi.object({
-  userId: userId.required(),
   amount: amount.required(),
   status
 });
