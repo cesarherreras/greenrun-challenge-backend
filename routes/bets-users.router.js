@@ -17,7 +17,8 @@ router.post('/',
   async (req, res, next) => {
     try {
       const body = req.body;
-      const newuserbet = await service.create(body);
+      const user = req.user;
+      const newuserbet = await service.create(user.sub, body);
       res.status(201).json(newuserbet);
     } catch (error) {
       next(error);

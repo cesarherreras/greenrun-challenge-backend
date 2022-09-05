@@ -5,18 +5,18 @@ const { Op, Sequelize } = require('sequelize');
 class UserBetService {
   constructor() {}
 
-  async create(data) {
+  async create(user, data) {
     const betsTocreate = data.bets;
     await Promise.all(betsTocreate.map(async(element) => {
       //Calculate and check the user balance
       const totalAmount = await models.Transaction.findAll({
-        where: {userId: element.userId},
+        where: {userId: user},
         attributes: [[Sequelize.fn('sum', Sequelize.col('amount')), 'totalAmount']],
         raw: true
       });
       if(totalAmount[0].totalAmount >= element.amount) {
         const addData = {
-            userId: element.userId,
+            userId: user,
             amount: element.amount * (-1),
             status:'done',
             category: 'bet'
