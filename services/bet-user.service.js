@@ -29,6 +29,7 @@ class UserBetService {
             where: { id: element.betId }
           });
           if(existingBet.dataValues.status === 'active') {
+            element.userId = user;
             await models.UserBet.create(element);
             await models.Transaction.create(addData);
           }
